@@ -2,28 +2,29 @@ from fastapi import FastAPI, Depends, status, Response
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 import schemas, models
-from database import SessionLocal, engine
+from database import SessionLocal, engine, get_db
 from hashing import Hash
-
+from . import api_router
 app = FastAPI()
 
 models.Base.metadata.create_all(engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+app.include_router(api_router.router)
 
+#def get_db():
+#    db = SessionLocal()
+#    try:
+#        yield db
+#    finally:
+#        db.close()
 
+# Home
 @app.get('/')
 def index():
     return {'msg' : 'Hello FastAPI!!'}
 
-
 # Register
-@app.post('/user', status_code = status.HTTP_201_CREATED)
+@app.post('/user', status_code = status.HTTP_201_CREATED, tags = ['user'])
 def create(request: schemas.User, db: Session = Depends(get_db)):
     new_user = models.User(name = request.name, email = request.email, password = Hash.bcrypt(request.password))
     db.add(new_user)
@@ -32,14 +33,14 @@ def create(request: schemas.User, db: Session = Depends(get_db)):
     return new_user
 
 # Delete User
-@app.delete('/user/{id}', status_code = status.HTTP_204_NO_CONTENT)
+@app.delete('/user/{id}', status_code = status.HTTP_204_NO_CONTENT, tags = ['user'])
 def delete(id, db: Session = Depends(get_db)):
     db.query(models.User).filter(models.User.id == id).delete(synchronize_session=False)
     db.commit()
     return 'done'
 
 # Update User
-@app.put('/user/{id}', status_code=status.HTTP_202_ACCEPTED)
+@app.put('/user/{id}', status_code=status.HTTP_202_ACCEPTED, tags = ['user'])
 def update_id(id, request: schemas.Update_User, db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id)
     if not user.first():
@@ -48,21 +49,21 @@ def update_id(id, request: schemas.Update_User, db : Session = Depends(get_db)):
     db.commit()
     return 'done'
 
-
 # Qurry all User
-@app.get('/user', status_code= status.HTTP_200_OK)
-def querry(db : Session = Depends(get_db)):
-    users = db.query(models.User).order_by(models.User.id).all()
-    return users
-
+#@app.get('/user', status_code= status.HTTP_200_OK, response_model = schemas.ShowUser, tags = ['user'])
+#def querry(db : Session = Depends(get_db)):
+#    users = db.query(models.User).order_by(models.User.id).all()
+#    return users
 
 # Querry User By id
-@app.get('/user/{id}', status_code=status.HTTP_200_OK, response_model = schemas.ShowUser)
+@app.get('/user/{id}', status_code=status.HTTP_200_OK, response_model = schemas.ShowUser, tags = ['user'])
 def show(id, response : Response, db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return {'detail' : f'blog with the id {id} is not aviavle'}
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
-                            detail = f'blog with the id {id} is not aviable')
+                            detail = f'user with the id {id} is not aviable')
     return user
+
+# 
