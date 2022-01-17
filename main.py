@@ -1,9 +1,6 @@
-from fastapi import FastAPI, Depends, status, Response
-from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
-import schemas, models, user
+from fastapi import FastAPI
+import models, user
 from database import engine, get_db
-
 
 app = FastAPI()
 
