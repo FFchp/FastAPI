@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-
 #request field
 
 class User(BaseModel):
