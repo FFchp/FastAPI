@@ -26,13 +26,6 @@ def create(request: schemas.User, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-# Delete User
-#@app.delete('/user/{id}', status_code = status.HTTP_204_NO_CONTENT, tags = ['user'])
-#def delete(id, db: Session = Depends(get_db)):
-#    db.query(models.User).filter(models.User.id == id).delete(synchronize_session=False)
-#    db.commit()
-#    return 'done'
-
 # Update User
 @app.put('/user/{id}', status_code=status.HTTP_202_ACCEPTED, tags = ['user'])
 def update_id(id, request: schemas.Update_User, db : Session = Depends(get_db)):
@@ -60,4 +53,9 @@ def update_id(id, request: schemas.Update_User, db : Session = Depends(get_db)):
 #                            detail = f'user with the id {id} is not aviable')
 #    return user
 
-# 
+# Delete User
+#@app.delete('/user/{id}', status_code = status.HTTP_204_NO_CONTENT, tags = ['user'])
+#def delete(id, db: Session = Depends(get_db)):
+#    db.query(models.User).filter(models.User.id == id).delete(synchronize_session=False)
+#    db.commit()
+#    return 'done'
