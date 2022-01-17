@@ -3,6 +3,7 @@ from fastapi.exceptions import HTTPException
 from typing import List
 import schemas, database, models
 from sqlalchemy.orm import Session
+from hashing import Hash
 
 router = APIRouter()
 
@@ -32,4 +33,30 @@ def delete(id, db: Session = Depends(get_db)):
     db.commit()
     return 'done'
 
+# Update User
+@router.put('/user/{id}', status_code=status.HTTP_202_ACCEPTED, tags = ['user'])
+def update_id(id, request: schemas.Update_User, db : Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id)
+    if not user.first():
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f'User with id {id} not found')
+    user.update(request.dict())
+    db.commit()
+    return 'done'
 
+# Register
+@router.post('/user', status_code = status.HTTP_201_CREATED, tags = ['user'])
+def create(request: schemas.User, db: Session = Depends(get_db)):
+    new_user = models.User(name = request.name, email = request.email, password = Hash.bcrypt(request.password))
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+# Register
+@router.post('/user', status_code = status.HTTP_201_CREATED, tags = ['user'])
+def create(request: schemas.User, db: Session = Depends(get_db)):
+    new_user = models.User(name = request.name, email = request.email, password = Hash.bcrypt(request.password))
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
